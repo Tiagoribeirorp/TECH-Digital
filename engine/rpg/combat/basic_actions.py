@@ -81,6 +81,43 @@ def execute_move(
     )
 
 
+
+def select_defense_choice(
+    combat: CombatState,
+    character_id: str,
+    action: CombatAction,
+    *,
+    weapon_speed: float | None = None,
+) -> DefenseChoiceState:
+    """Choose a reaction after an attack is announced."""
+    if combat.phase != CombatPhase.DECLARATION:
+        raise ValueError("Defense choices can only be selected during declaration phase")
+    if action not in {CombatAction.DODGE, CombatAction.PARRY, CombatAction.BLOCK}:
+        raise ValueError("Action is not a basic defensive reaction")
+    combatant = combat.get_combatant(character_id)
+    if not combatant.is_active:
+        raise ValueError("Inactive combatant cannot choose a defense")
+    if combatant.defense_choice.choice is not DefenseChoice.NONE:
+        raise ValueError("A defense reaction has already been selected this round")
+    cost = action_speed_cost(action, weapon_speed=weapon_speed)
+    if combatant.available_speed < cost:
+        raise ValueError("Not enough Vel/Tur for defensive action")
+    shield = combatant.equipped_combat_equipment.shield
+    combatant.defense_choice = DefenseChoiceState(
+        choice=DefenseChoice(action.value),
+        weapon_speed=weapon_speed,
+        shield_block_bonus=0 if shield is None else shield.block_bonus,
+    )
+    combatant.available_speed -= cost
+    combat.combat_log.append({
+        "event": "defense_choice_selected",
+        "round": combat.round_number,
+        "character_id": character_id,
+        "action": action.value,
+        "speed_spent": cost,
+    })
+    return combatant.defense_choice
+
 def execute_defensive_action(
     combat: CombatState,
     character_id: str,
