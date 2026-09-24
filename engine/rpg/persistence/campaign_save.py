@@ -8,6 +8,7 @@ from typing import Any
 from engine.rpg.campaign.state import CampaignState, MetaProgression
 from engine.rpg.character.state import Attributes, CharacterState
 from engine.rpg.equipment.definitions import EquipmentInstance, InventoryState, LoadCategory
+from engine.rpg.progression.state import ProgressionState
 
 
 SAVE_VERSION = 2
@@ -52,6 +53,7 @@ def campaign_from_dict(data: dict[str, Any]) -> CampaignState:
     return CampaignState(
         id=data["id"],
         character=_character_from_dict(data["character"]),
+        progression=ProgressionState(**data.get("progression", {})),
         quests=dict(data.get("quests", {})),
         npc_states=dict(data.get("npc_states", {})),
         faction_states=dict(data.get("faction_states", {})),
