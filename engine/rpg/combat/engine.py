@@ -23,7 +23,7 @@ def roll_initiative(combat: CombatState, roller: Roller) -> list[str]:
         roll = roller()
         if not 1 <= roll <= 20:
             raise ValueError("initiative d20 roll must be between 1 and 20")
-        combatant.initiative_result = combatant.character.derive_stats().reaction_time_base + roll
+        combatant.initiative_result = combatant.effective_stats().reaction_time_base + roll
     ordered = sorted(combat.participants, key=lambda item: item.initiative_result or -1, reverse=True)
     combat.initiative_order = [item.character.id for item in ordered]
     combat.round_number = 1
@@ -111,7 +111,7 @@ def finish_round(combat: CombatState) -> None:
         return
     for combatant in combat.participants:
         combatant.declared_action = None
-        combatant.available_speed = combatant.character.derive_stats().speed_per_turn
+        combatant.available_speed = combatant.effective_stats().speed_per_turn
     combat.round_number += 1
     combat.phase = CombatPhase.DECLARATION
     combat.combat_log.append({"event": "round_started", "round": combat.round_number})
