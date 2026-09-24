@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from engine.rpg.character.state import CharacterState
+from engine.rpg.progression.state import ProgressionState
 
 
 @dataclass
@@ -17,6 +18,7 @@ class CampaignState:
 
     id: str
     character: CharacterState
+    progression: ProgressionState = field(default_factory=ProgressionState)
     quests: dict[str, dict[str, Any]] = field(default_factory=dict)
     npc_states: dict[str, dict[str, Any]] = field(default_factory=dict)
     faction_states: dict[str, dict[str, Any]] = field(default_factory=dict)
