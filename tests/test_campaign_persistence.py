@@ -17,6 +17,7 @@ def test_full_campaign_round_trip(tmp_path: Path):
         talents=["talent-1"],
     )
     campaign = CampaignState(id="campaign-1", character=character)
+    campaign.progression.add_evolution_points(12)
     campaign.decisions.append({"id": "door", "choice": "open"})
     campaign.discoveries.append("fragment-1")
     campaign.active_consequences.append({"id": "alarm", "active": True})
@@ -34,6 +35,8 @@ def test_full_campaign_round_trip(tmp_path: Path):
     assert loaded_campaign.id == campaign.id
     assert loaded_campaign.character.attributes.as_dict() == character.attributes.as_dict()
     assert loaded_campaign.character.current_hp == 9
+    assert loaded_campaign.progression.experience_points == 12
+    assert loaded_campaign.progression.spendable_evolution_points == 12
     assert loaded_campaign.decisions == campaign.decisions
     assert loaded_campaign.discoveries == campaign.discoveries
     assert loaded_campaign.active_consequences == campaign.active_consequences
