@@ -7,6 +7,8 @@ establish a universal formula deriving them from every weapon, armor and skill.
 from dataclasses import dataclass
 
 from engine.rpg.combat.actions import CombatAction, action_modifiers
+from engine.rpg.combat.defense import DefenseMode, resolve_defense
+from engine.rpg.combat.defensive_state import DefenseChoice
 from engine.rpg.combat.rules import CombatRules, DEFAULT_COMBAT_RULES
 from engine.rpg.combat.damage import apply_damage
 from engine.rpg.combat.opposed_attack import (
@@ -131,6 +133,75 @@ def resolve_opposed_attack_action(
         resolution_sequence=record.sequence,
     )
 
+
+
+def resolve_attack_against_choice(
+    combat: CombatState,
+    attacker_id: str,
+    target_id: str,
+    *,
+    attack_roll: int,
+    defense_roll: int,
+    roller=None,
+    attack_value: int | None = None,
+    defense_value: int | None = None,
+    damage: int | None = None,
+    action: CombatAction = CombatAction.ATTACK,
+    rules: CombatRules = DEFAULT_COMBAT_RULES,
+) -> OpposedAttackCombatResult:
+    """Resolve an attack using the target's stored defensive choice.
+
+    The choice selects the already-defined defense type and cost. The caller
+    may still provide an explicit defense value until the final attack/defense
+    formulas are validated by the source.
+    """
+    target = combat.get_combatant(target_id)
+    choice = target.defense_choice.choice
+    if choice is DefenseChoice.NONE:
+        selected_defense = defense_value
+    else:
+        mode = {
+            DefenseChoice.DODGE: DefenseMode.DODGE,
+            DefenseChoice.PARRY: DefenseMode.PARRY,
+            DefenseChoice.BLOCK: DefenseMode.BLOCK,
+        }[choice]
+        selected_defense = defense_value
+        if selected_defense is None:
+            if mode is DefenseMode.PARRY:
+                skill = target.character.skill_values.get("parry")
+                if skill is None:
+                    raise ValueError("Parry requires an explicit defense value or parry skill")
+                selected_defense = resolve_defense(
+                    target.character,
+                    mode,
+                    parry_skill=skill,
+                    equipment=target.equipped_combat_equipment,
+                ).value
+            elif mode is DefenseMode.BLOCK:
+                skill = target.character.skill_values.get("shield")
+                if skill is None:
+                    raise ValueError("Block requires an explicit defense value or shield skill")
+                selected_defense = resolve_defense(
+                    target.character,
+                    mode,
+                    shield_skill=skill,
+                    equipment=target.equipped_combat_equipment,
+                ).value
+            else:
+                selected_defense = resolve_defense(target.character, mode).value
+
+    return resolve_opposed_attack_action(
+        combat,
+        attacker_id,
+        target_id,
+        attack_roll=attack_roll,
+        attack_value=attack_value,
+        defense_roll=defense_roll,
+        defense_value=selected_defense,
+        damage=damage,
+        action=action,
+        rules=rules,
+    )
 
 
 def perform_basic_attack(
