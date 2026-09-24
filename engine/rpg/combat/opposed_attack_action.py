@@ -130,3 +130,48 @@ def resolve_opposed_attack_action(
         resolution_id=record.id,
         resolution_sequence=record.sequence,
     )
+
+
+
+def perform_basic_attack(
+    combat: CombatState,
+    attacker_id: str,
+    target_id: str,
+    *,
+    roller,
+    attack_value: int | None = None,
+    defense_value: int | None = None,
+    damage: int | None = None,
+    rules: CombatRules = DEFAULT_COMBAT_RULES,
+) -> OpposedAttackCombatResult:
+    """Perform one basic attack using provisional defaults when unspecified."""
+    attacker = combat.get_combatant(attacker_id)
+    weapon = attacker.equipped_combat_equipment.weapon
+    weapon_damage = None if weapon is None else weapon.damage
+    base_damage = damage if damage is not None else weapon_damage
+    if base_damage is None:
+        base_damage = rules.default_damage
+
+    if not attacker.is_active:
+        raise ValueError("Inactive attacker cannot attack")
+    if not can_pay_basic_attack_speed(attacker.available_speed):
+        raise ValueError("Not enough Vel/Tur for basic attack")
+
+    result = resolve_opposed_attack_action(
+        combat,
+        attacker_id,
+        target_id,
+        attack_roll=roller(),
+        attack_value=attack_value,
+        defense_roll=roller(),
+        defense_value=defense_value,
+        damage=base_damage,
+        rules=rules,
+    )
+    attacker.available_speed -= 0
+    return result
+
+
+def can_pay_basic_attack_speed(available_speed: float) -> bool:
+    """Basic attack currently has no confirmed Vel/Tur cost."""
+    return available_speed >= 0
