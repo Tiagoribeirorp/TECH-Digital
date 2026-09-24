@@ -3,6 +3,7 @@
 from collections.abc import Callable, Iterable
 
 from engine.rpg.character.state import CharacterState
+from engine.rpg.equipment.definitions import EquipmentDefinition
 from engine.rpg.combat.actions import ACTION_RULES, CombatAction, action_modifiers, can_pay_speed
 from engine.rpg.combat.damage import apply_damage
 from engine.rpg.combat.state import CombatPhase, CombatState, CombatantState
@@ -15,7 +16,7 @@ Roller = Callable[[], int]
 def start_combat(
     characters: Iterable[CharacterState],
     *,
-    equipment_definitions: dict[str, object] | None = None,
+    equipment_definitions: dict[str, EquipmentDefinition] | None = None,
 ) -> CombatState:
     participants = [
         CombatantState.from_character(
