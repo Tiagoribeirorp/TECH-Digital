@@ -10,6 +10,7 @@ from engine.rpg.character.state import CharacterState
 from engine.rpg.core.resolution import ResolutionRecord
 from engine.rpg.equipment.definitions import EquipmentDefinition
 from engine.rpg.equipment.resolver import equipment_modifier_sources
+from engine.rpg.combat.equipment import EquippedCombatEquipment, resolve_equipped_combat_equipment
 
 
 class CombatPhase(str, Enum):
@@ -29,6 +30,7 @@ class CombatantState:
     declared_action: str | None = None
     status: str = "active"
     modifier_sources: tuple[ModifierSource, ...] = ()
+    equipped_combat_equipment: EquippedCombatEquipment = field(default_factory=EquippedCombatEquipment)
 
     @classmethod
     def from_character(
@@ -40,7 +42,10 @@ class CombatantState:
     ) -> "CombatantState":
         character.initialize_resources()
         resolved_equipment = {} if equipment_definitions is None else dict(equipment_definitions)
-        equipment_sources = equipment_modifier_sources(resolved_equipment)
+        equipped_combat_equipment = resolve_equipped_combat_equipment(character, resolved_equipment)
+        equipped_ids = {item.definition_id for item in character.inventory.items if item.equipped}
+        equipped_definitions = {key: value for key, value in resolved_equipment.items() if key in equipped_ids}
+        equipment_sources = equipment_modifier_sources(equipped_definitions)
         combined_sources = tuple(modifier_sources) + equipment_sources
         stats = derive_effective_stats(character, *combined_sources)
         return cls(
@@ -49,6 +54,7 @@ class CombatantState:
             current_fatigue=character.current_fatigue if character.current_fatigue is not None else stats.fatigue_max,
             available_speed=stats.speed_per_turn,
             modifier_sources=combined_sources,
+            equipped_combat_equipment=equipped_combat_equipment,
         )
 
     def effective_stats(self):
