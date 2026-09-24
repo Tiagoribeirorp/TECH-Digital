@@ -5,6 +5,8 @@ from collections.abc import Callable, Iterable
 from engine.rpg.character.state import CharacterState
 from engine.rpg.combat.actions import ACTION_RULES, CombatAction, can_pay_speed
 from engine.rpg.combat.state import CombatPhase, CombatState, CombatantState
+from engine.rpg.core.resolution import ResolutionRecord
+from engine.rpg.core.resolution_log import append_resolution
 
 Roller = Callable[[], int]
 
@@ -77,7 +79,7 @@ def spend_action_speed(combat: CombatState, character_id: str, action: CombatAct
 
 
 def resolve_basic_attack(combat: CombatState, attacker_id: str, target_id: str,
-                         *, attack_success: bool, damage: int = 0) -> dict[str, object]:
+                         *, attack_success: bool, damage: int = 0, random_roll: int | None = None, modifiers: dict[str, int] | None = None, effective_value: int | float | None = None) -> dict[str, object]:
     if combat.phase != CombatPhase.EXECUTION:
         raise ValueError("Attacks can only resolve during execution phase")
     attacker = combat.get_combatant(attacker_id)
@@ -97,6 +99,26 @@ def resolve_basic_attack(combat: CombatState, attacker_id: str, target_id: str,
               "success": attack_success, "damage": applied_damage,
               "target_hp": target.current_hp}
     combat.combat_log.append(result)
+    record = append_resolution(
+        combat.resolution_log,
+        ResolutionRecord(
+            source="combat",
+            action=CombatAction.ATTACK.value,
+            actor_id=attacker_id,
+            target_id=target_id,
+            random_roll=random_roll,
+            modifiers={} if modifiers is None else modifiers,
+            effective_value=effective_value,
+            result="success" if attack_success else "failure",
+            consequences={
+                "damage": applied_damage,
+                "target_hp": target.current_hp,
+                "target_status": target.status,
+            },
+        ),
+    )
+    result["resolution_id"] = record.id
+    result["resolution_sequence"] = record.sequence
     return result
 
 
