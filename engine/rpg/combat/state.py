@@ -8,6 +8,8 @@ from engine.rpg.character.effective import derive_effective_stats
 from engine.rpg.character.modifiers import ModifierSource
 from engine.rpg.character.state import CharacterState
 from engine.rpg.core.resolution import ResolutionRecord
+from engine.rpg.equipment.definitions import EquipmentDefinition
+from engine.rpg.equipment.resolver import equipment_modifier_sources
 
 
 class CombatPhase(str, Enum):
@@ -34,6 +36,7 @@ class CombatantState:
         character: CharacterState,
         *,
         modifier_sources: tuple[ModifierSource, ...] = (),
+        equipment_definitions: dict[str, EquipmentDefinition] | None = None,
     ) -> "CombatantState":
         character.initialize_resources()
         resolved_equipment = {} if equipment_definitions is None else dict(equipment_definitions)
@@ -42,10 +45,10 @@ class CombatantState:
         stats = derive_effective_stats(character, *combined_sources)
         return cls(
             character=character,
-            current_hp=character.current_hp or stats.hp_max,
-            current_fatigue=character.current_fatigue or stats.fatigue_max,
+            current_hp=character.current_hp if character.current_hp is not None else stats.hp_max,
+            current_fatigue=character.current_fatigue if character.current_fatigue is not None else stats.fatigue_max,
             available_speed=stats.speed_per_turn,
-            modifier_sources=modifier_sources,
+            modifier_sources=combined_sources,
         )
 
     def effective_stats(self):
