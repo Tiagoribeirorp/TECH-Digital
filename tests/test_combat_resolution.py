@@ -16,7 +16,7 @@ def test_attack_resolution_preserves_critical_results():
     assert success.test.critical_success is True
     assert success.test.success is True
     assert failure.test.critical_failure is True
-    assert failure.test.success is True
+    assert failure.test.success is False
 
 
 def test_attack_resolution_rejects_invalid_roll():
