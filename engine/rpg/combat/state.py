@@ -11,6 +11,7 @@ from engine.rpg.core.resolution import ResolutionRecord
 from engine.rpg.equipment.definitions import EquipmentDefinition
 from engine.rpg.equipment.resolver import equipment_modifier_sources
 from engine.rpg.combat.equipment import EquippedCombatEquipment, resolve_equipped_combat_equipment
+from engine.rpg.combat.defensive_state import DefenseChoice, DefenseChoiceState
 
 
 class CombatPhase(str, Enum):
@@ -31,6 +32,7 @@ class CombatantState:
     status: str = "active"
     modifier_sources: tuple[ModifierSource, ...] = ()
     equipped_combat_equipment: EquippedCombatEquipment = field(default_factory=EquippedCombatEquipment)
+    defense_choice: DefenseChoiceState = field(default_factory=DefenseChoiceState)
 
     @classmethod
     def from_character(
