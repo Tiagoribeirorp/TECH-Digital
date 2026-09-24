@@ -1,19 +1,16 @@
-"""Headless combat simulator for T.E.C.H. Digital development.
+"""Headless combat simulator for attack announcements and reactions.
 
-This is a deterministic-friendly prototype harness. It uses provisional combat
-values and the engine's real combat resolution, logs and state transitions.
-It is not a final gameplay rule set.
+This prototype models: declaration -> attack announcement -> defender reaction
+-> execution -> opposed attack resolution. Final attack/defense formulas remain
+configurable because some source rules are still pending validation.
 """
 
 from dataclasses import dataclass
 
 from engine.rpg.character.state import Attributes, CharacterState
-from engine.rpg.combat.engine import (
-    begin_execution,
-    finish_round,
-    roll_initiative,
-    start_combat,
-)
+from engine.rpg.combat.actions import CombatAction
+from engine.rpg.combat.basic_actions import select_defense_choice
+from engine.rpg.combat.engine import begin_execution, declare_action, finish_round, roll_initiative, start_combat
 from engine.rpg.combat.opposed_attack_action import perform_basic_attack
 from engine.rpg.equipment.definitions import EquipmentInstance
 from engine.rpg.equipment.starter import STARTER_EQUIPMENT
@@ -54,17 +51,21 @@ def _character(character_id: str, name: str) -> CharacterState:
     return character
 
 
-def simulate_basic_fight(
+def simulate_reactive_fight(
     *,
     initiative_rolls: list[int] | None = None,
     action_rolls: list[int] | None = None,
     max_rounds: int = 20,
+    defender_reaction: CombatAction = CombatAction.DODGE,
 ) -> SimulationResult:
-    """Run a complete two-character fight without Godot.
+    """Run a deterministic two-character fight with a defense reaction window."""
+    if defender_reaction not in {
+        CombatAction.DODGE,
+        CombatAction.PARRY,
+        CombatAction.BLOCK,
+    }:
+        raise ValueError("defender_reaction must be DODGE, PARRY or BLOCK")
 
-    Rolls can be supplied to make the simulation reproducible. The action roll
-    sequence is consumed as attack/defense pairs.
-    """
     hero = _character("hero", "Herói")
     enemy = _character("enemy", "Inimigo")
     combat = start_combat([hero, enemy], equipment_definitions=STARTER_EQUIPMENT)
@@ -90,26 +91,41 @@ def simulate_basic_fight(
         return value
 
     while combat.status == "active" and combat.round_number <= max_rounds:
+        # Announcement phase: the slower side declares first.
+        for character_id in reversed(combat.initiative_order):
+            combatant = combat.get_combatant(character_id)
+            if combatant.is_active:
+                declare_action(combat, character_id, CombatAction.ATTACK.value)
+
+        attacker_id, target_id = combat.initiative_order[:2]
+        combat.combat_log.append({
+            "event": "attack_announced",
+            "round": combat.round_number,
+            "attacker_id": attacker_id,
+            "target_id": target_id,
+        })
+
+        # Reaction window: the target chooses its defense after the attack is announced.
+        target = combat.get_combatant(target_id)
+        if target.is_active:
+            weapon = target.equipped_combat_equipment.weapon
+            select_defense_choice(
+                combat,
+                target_id,
+                defender_reaction,
+                weapon_speed=None if weapon is None else weapon.speed,
+            )
+
         begin_execution(combat)
 
-        active = [item for item in combat.participants if item.is_active]
-        if len(active) <= 1:
-            break
-
-        first, second = active[0], active[1]
-
-        perform_basic_attack(
-            combat,
-            first.character.id,
-            second.character.id,
-            roller=action_roller,
-        )
-
-        if second.is_active:
+        if (
+            combat.get_combatant(attacker_id).is_active
+            and combat.get_combatant(target_id).is_active
+        ):
             perform_basic_attack(
                 combat,
-                second.character.id,
-                first.character.id,
+                attacker_id,
+                target_id,
                 roller=action_roller,
             )
 
@@ -132,9 +148,14 @@ def simulate_basic_fight(
     )
 
 
+def simulate_basic_fight(**kwargs) -> SimulationResult:
+    """Backward-compatible alias for the original simulator entry point."""
+    return simulate_reactive_fight(**kwargs)
+
+
 if __name__ == "__main__":
-    result = simulate_basic_fight()
-    print("=== T.E.C.H. Digital — Basic Combat Simulation ===")
+    result = simulate_reactive_fight()
+    print("=== T.E.C.H. Digital — Reactive Combat Simulation ===")
     print(f"Status: {result.combat_status}")
     print(f"Rounds: {result.rounds}")
     print(f"Winner: {result.winner_id}")
