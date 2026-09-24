@@ -7,6 +7,7 @@ from typing import Any
 from engine.rpg.character.effective import derive_effective_stats
 from engine.rpg.character.modifiers import ModifierSource
 from engine.rpg.character.state import CharacterState
+from engine.rpg.core.resolution import ResolutionRecord
 
 
 class CombatPhase(str, Enum):
@@ -45,10 +46,7 @@ class CombatantState:
         )
 
     def effective_stats(self):
-        return derive_effective_stats(
-            self.character,
-            *self.modifier_sources,
-        )
+        return derive_effective_stats(self.character, *self.modifier_sources)
 
     @property
     def is_active(self) -> bool:
@@ -62,6 +60,7 @@ class CombatState:
     phase: CombatPhase = CombatPhase.SETUP
     initiative_order: list[str] = field(default_factory=list)
     combat_log: list[dict[str, Any]] = field(default_factory=list)
+    resolution_log: list[ResolutionRecord] = field(default_factory=list)
     status: str = "pending"
 
     def get_combatant(self, character_id: str) -> CombatantState:
