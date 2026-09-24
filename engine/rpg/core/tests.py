@@ -23,11 +23,15 @@ def resolve_test(roll: int, effective_value: int) -> TestResult:
     if not 1 <= roll <= 20:
         raise ValueError("d20 roll must be between 1 and 20")
 
+    critical_success = roll == 1
+    critical_failure = roll == 20
+    success = False if critical_failure else (True if critical_success else roll <= effective_value)
+    margin = effective_value - roll
     return TestResult(
         roll=roll,
         target=effective_value,
-        success=roll <= effective_value,
-        margin=effective_value - roll,
+        success=success,
+        margin=margin,
     )
 
 
