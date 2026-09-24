@@ -7,6 +7,7 @@ in the opposed attack layer until the source defines the complete formula.
 
 from dataclasses import dataclass
 
+from engine.rpg.combat.defensive_state import DefenseChoice, DefenseChoiceState
 from engine.rpg.combat.actions import (
     CombatAction,
     action_speed_cost,
@@ -111,6 +112,13 @@ def execute_defensive_action(
         CombatAction.BLOCK: "block",
     }[action]
     combatant.declared_action = action.value
+    choice = DefenseChoice(action.value)
+    shield = combatant.equipped_combat_equipment.shield
+    combatant.defense_choice = DefenseChoiceState(
+        choice=choice,
+        weapon_speed=weapon_speed,
+        shield_block_bonus=0 if shield is None else shield.block_bonus,
+    )
 
     record = append_resolution(
         combat.resolution_log,
