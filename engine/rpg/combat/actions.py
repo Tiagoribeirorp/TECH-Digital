@@ -75,6 +75,16 @@ ACTION_RULES: dict[CombatAction, ActionRule] = {
 }
 
 
+def action_modifiers(action: CombatAction) -> dict[str, int]:
+    """Return confirmed numeric modifiers for a combat action."""
+    rule = ACTION_RULES[action]
+    return {
+        "attack": rule.attack_modifier,
+        "defense": rule.defense_modifier,
+        "damage": rule.damage_modifier,
+    }
+
+
 def movement_distance_for_speed(speed_per_turn: float) -> float:
     """Convert Vel/Tur into metres using the confirmed 1.5m ratio."""
     return speed_per_turn * 1.5
