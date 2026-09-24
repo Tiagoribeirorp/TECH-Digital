@@ -3,7 +3,7 @@
 from collections.abc import Callable, Iterable
 
 from engine.rpg.character.state import CharacterState
-from engine.rpg.combat.actions import ACTION_RULES, CombatAction, can_pay_speed
+from engine.rpg.combat.actions import ACTION_RULES, CombatAction, action_modifiers, can_pay_speed
 from engine.rpg.combat.damage import apply_damage
 from engine.rpg.combat.state import CombatPhase, CombatState, CombatantState
 from engine.rpg.core.resolution import ResolutionRecord
@@ -12,8 +12,18 @@ from engine.rpg.core.resolution_log import append_resolution
 Roller = Callable[[], int]
 
 
-def start_combat(characters: Iterable[CharacterState]) -> CombatState:
-    participants = [CombatantState.from_character(character) for character in characters]
+def start_combat(
+    characters: Iterable[CharacterState],
+    *,
+    equipment_definitions: dict[str, object] | None = None,
+) -> CombatState:
+    participants = [
+        CombatantState.from_character(
+            character,
+            equipment_definitions=equipment_definitions,
+        )
+        for character in characters
+    ]
     if len(participants) < 2:
         raise ValueError("Combat requires at least two participants")
     return CombatState(participants=participants, status="active")
