@@ -36,7 +36,10 @@ class CombatantState:
         modifier_sources: tuple[ModifierSource, ...] = (),
     ) -> "CombatantState":
         character.initialize_resources()
-        stats = derive_effective_stats(character, *modifier_sources)
+        resolved_equipment = {} if equipment_definitions is None else dict(equipment_definitions)
+        equipment_sources = equipment_modifier_sources(resolved_equipment)
+        combined_sources = tuple(modifier_sources) + equipment_sources
+        stats = derive_effective_stats(character, *combined_sources)
         return cls(
             character=character,
             current_hp=character.current_hp or stats.hp_max,
