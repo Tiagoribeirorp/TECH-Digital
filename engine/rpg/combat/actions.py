@@ -76,7 +76,11 @@ ACTION_RULES: dict[CombatAction, ActionRule] = {
 
 
 def action_modifiers(action: CombatAction) -> dict[str, int]:
-    """Return confirmed numeric modifiers for a combat action."""
+    """Return confirmed numeric modifiers for a combat action.
+
+    These values are currently encoded as source-confirmed action rules;
+    universal attack/defense formulas remain configurable elsewhere.
+    """
     rule = ACTION_RULES[action]
     return {
         "attack": rule.attack_modifier,
