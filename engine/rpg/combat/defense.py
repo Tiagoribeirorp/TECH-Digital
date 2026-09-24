@@ -10,6 +10,8 @@ from enum import Enum
 
 from engine.rpg.character.state import CharacterState
 from engine.rpg.character.effective import derive_effective_stats
+from engine.rpg.combat.equipment import EquippedCombatEquipment
+from engine.rpg.combat.defense_equipment import EquipmentDefenseContext, defense_equipment_context
 
 
 class DefenseMode(str, Enum):
@@ -33,9 +35,13 @@ def resolve_defense(
     parry_skill: int | None = None,
     shield_skill: int | None = None,
     modifier: int = 0,
+    equipment: EquippedCombatEquipment | None = None,
 ) -> DefenseResolution:
     """Return the selected defense value from confirmed derived statistics."""
     stats = derive_effective_stats(character)
+    equipment_context: EquipmentDefenseContext | None = None
+    if equipment is not None:
+        equipment_context = defense_equipment_context(equipment)
 
     if mode is DefenseMode.EVASION:
         value = stats.evasion
@@ -47,6 +53,8 @@ def resolve_defense(
         if shield_skill is None:
             raise ValueError("Block requires the shield skill value")
         value = shield_skill / 2
+        if equipment_context is not None:
+            value += equipment_context.shield_block_bonus
     elif mode is DefenseMode.DODGE:
         value = stats.evasion
     else:
