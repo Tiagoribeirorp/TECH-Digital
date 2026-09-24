@@ -4,6 +4,7 @@ from collections.abc import Callable, Iterable
 
 from engine.rpg.character.state import CharacterState
 from engine.rpg.combat.actions import ACTION_RULES, CombatAction, can_pay_speed
+from engine.rpg.combat.damage import apply_damage
 from engine.rpg.combat.state import CombatPhase, CombatState, CombatantState
 from engine.rpg.core.resolution import ResolutionRecord
 from engine.rpg.core.resolution_log import append_resolution
@@ -90,9 +91,10 @@ def resolve_basic_attack(combat: CombatState, attacker_id: str, target_id: str,
         raise ValueError("Inactive target cannot be attacked")
     if damage < 0:
         raise ValueError("Damage cannot be negative")
-    applied_damage = damage if attack_success else 0
-    target.current_hp = max(0, target.current_hp - applied_damage)
-    if target.current_hp == 0:
+    damage_result = apply_damage(target.current_hp, damage if attack_success else 0)
+    applied_damage = damage_result.applied_damage
+    target.current_hp = damage_result.remaining_hp
+    if damage_result.became_unconscious:
         target.status = "unconscious"
     result = {"event": "basic_attack_resolved", "round": combat.round_number,
               "attacker_id": attacker_id, "target_id": target_id,
