@@ -7,7 +7,7 @@ weapon/armor combination, so those values remain explicit inputs here.
 
 from dataclasses import dataclass
 
-from engine.rpg.core.tests import resolve_resisted_test, TestResult
+from engine.rpg.core.tests import resolve_resisted_test, resolve_test, TestResult
 
 
 @dataclass(frozen=True)
@@ -30,14 +30,11 @@ def resolve_opposed_attack(
     if damage < 0:
         raise ValueError("Damage cannot be negative")
 
-    attack, defense = resolve_resisted_test(
-        first_roll=attack_roll,
-        first_value=attack_value,
-        second_roll=defense_roll,
-        second_value=defense_value,
-    )
+    attack = resolve_test(attack_roll, attack_value)
+    defense = resolve_test(defense_roll, defense_value)
+    outcome = resolve_resisted_test(attack, defense)
 
-    attacker_wins = attack.margin > defense.margin
+    attacker_wins = outcome == 1
     return OpposedAttackResolution(
         attack=attack,
         defense=defense,
