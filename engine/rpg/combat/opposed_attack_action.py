@@ -34,10 +34,10 @@ def resolve_opposed_attack_action(
     target_id: str,
     *,
     attack_roll: int,
-    attack_value: int,
+    attack_value: int | None = None,
     defense_roll: int,
-    defense_value: int,
-    damage: int,
+    defense_value: int | None = None,
+    damage: int | None = None,
     action: CombatAction = CombatAction.ATTACK,
     rules: CombatRules = DEFAULT_COMBAT_RULES,
 ) -> OpposedAttackCombatResult:
@@ -50,13 +50,16 @@ def resolve_opposed_attack_action(
         raise ValueError("Inactive attacker cannot attack")
     if not target.is_active:
         raise ValueError("Inactive target cannot be attacked")
-    if damage < 0:
+    base_attack = rules.default_attack_value if attack_value is None else attack_value
+    base_defense = rules.default_defense_value if defense_value is None else defense_value
+    base_damage = rules.default_damage if damage is None else damage
+    if base_damage < 0:
         raise ValueError("Damage cannot be negative")
 
     modifiers = action_modifiers(action)
-    effective_attack = attack_value + modifiers["attack"]
-    effective_defense = defense_value + modifiers["defense"]
-    effective_damage = max(0, damage + modifiers["damage"])
+    effective_attack = base_attack + modifiers["attack"]
+    effective_defense = base_defense + modifiers["defense"]
+    effective_damage = max(0, base_damage + modifiers["damage"])
 
     resolution = resolve_opposed_attack(
         attack_roll=attack_roll,
