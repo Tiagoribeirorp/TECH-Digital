@@ -1,14 +1,11 @@
-"""Combat state for the T.E.C.H. Digital RPG Engine prototype.
-
-This module models combat flow without inventing unresolved attack or damage formulas.
-The combat engine is responsible for ordering and state transitions; concrete attack,
-defense and damage values are supplied by rules that are already validated.
-"""
+"""Combat state for the T.E.C.H. Digital RPG Engine prototype."""
 
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+from engine.rpg.character.effective import derive_effective_stats
+from engine.rpg.character.modifiers import ModifierSource
 from engine.rpg.character.state import CharacterState
 
 
@@ -28,16 +25,29 @@ class CombatantState:
     initiative_result: int | None = None
     declared_action: str | None = None
     status: str = "active"
+    modifier_sources: tuple[ModifierSource, ...] = ()
 
     @classmethod
-    def from_character(cls, character: CharacterState) -> "CombatantState":
+    def from_character(
+        cls,
+        character: CharacterState,
+        *,
+        modifier_sources: tuple[ModifierSource, ...] = (),
+    ) -> "CombatantState":
         character.initialize_resources()
-        stats = character.derive_stats()
+        stats = derive_effective_stats(character, *modifier_sources)
         return cls(
             character=character,
             current_hp=character.current_hp or stats.hp_max,
             current_fatigue=character.current_fatigue or stats.fatigue_max,
             available_speed=stats.speed_per_turn,
+            modifier_sources=modifier_sources,
+        )
+
+    def effective_stats(self):
+        return derive_effective_stats(
+            self.character,
+            *self.modifier_sources,
         )
 
     @property
