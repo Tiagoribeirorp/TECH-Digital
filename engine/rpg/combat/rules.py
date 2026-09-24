@@ -15,6 +15,8 @@ class CombatRules:
     default_defense_value: int = 10
     default_damage: int = 5
 
+    # Placeholder only: future rules can replace these with formulas.
+
     # CONFIRMED values from the current combat material.
     surgical_attack_bonus: int = 3
     surgical_damage_bonus: int = 3
