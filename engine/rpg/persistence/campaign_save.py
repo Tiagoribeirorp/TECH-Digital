@@ -7,12 +7,29 @@ from typing import Any
 
 from engine.rpg.campaign.state import CampaignState, MetaProgression
 from engine.rpg.character.state import Attributes, CharacterState
+from engine.rpg.equipment.definitions import EquipmentInstance, InventoryState, LoadCategory
 
 
 SAVE_VERSION = 2
 
 
 def _character_from_dict(data: dict[str, Any]) -> CharacterState:
+    inventory_data = data.get("inventory", {})
+    inventory = InventoryState(
+        items=[
+            EquipmentInstance(
+                definition_id=item["definition_id"],
+                instance_id=item["instance_id"],
+                durability_current=item.get("durability_current"),
+                equipped=bool(item.get("equipped", False)),
+            )
+            for item in inventory_data.get("items", [])
+        ],
+        load_category=LoadCategory(
+            inventory_data.get("load_category", LoadCategory.LIGHT.value)
+        ),
+    )
+
     return CharacterState(
         id=data["id"],
         name=data["name"],
@@ -22,6 +39,8 @@ def _character_from_dict(data: dict[str, Any]) -> CharacterState:
         current_fatigue=data.get("current_fatigue"),
         skill_values=dict(data.get("skill_values", {})),
         talents=list(data.get("talents", [])),
+        inventory=inventory,
+        equipped=dict(data.get("equipped", {})),
     )
 
 
