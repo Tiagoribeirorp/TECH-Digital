@@ -4,7 +4,7 @@ from collections.abc import Callable, Iterable
 
 from engine.rpg.character.state import CharacterState
 from engine.rpg.equipment.definitions import EquipmentDefinition
-from engine.rpg.combat.actions import ACTION_RULES, CombatAction, action_modifiers, can_pay_speed
+from engine.rpg.combat.actions import ACTION_RULES, CombatAction, action_modifiers, action_speed_cost, can_pay_speed
 from engine.rpg.combat.damage import apply_damage
 from engine.rpg.combat.state import CombatPhase, CombatState, CombatantState
 from engine.rpg.core.resolution import ResolutionRecord
@@ -79,15 +79,18 @@ def action_rule(action: CombatAction):
 
 def can_execute_action(combat: CombatState, character_id: str, action: CombatAction) -> bool:
     combatant = combat.get_combatant(character_id)
-    return can_pay_speed(combatant.available_speed, action_rule(action).speed_cost)
+    weapon = combatant.equipped_combat_equipment.weapon
+    cost = action_speed_cost(action, weapon_speed=None if weapon is None else weapon.speed)
+    return can_pay_speed(combatant.available_speed, cost)
 
 
 def spend_action_speed(combat: CombatState, character_id: str, action: CombatAction) -> None:
     combatant = combat.get_combatant(character_id)
-    rule = action_rule(action)
-    if not can_pay_speed(combatant.available_speed, rule.speed_cost):
+    weapon = combatant.equipped_combat_equipment.weapon
+    cost = action_speed_cost(action, weapon_speed=None if weapon is None else weapon.speed)
+    if not can_pay_speed(combatant.available_speed, cost):
         raise ValueError("Not enough Vel/Tur for action")
-    combatant.available_speed -= rule.speed_cost
+    combatant.available_speed -= cost
 
 
 def resolve_basic_attack(combat: CombatState, attacker_id: str, target_id: str,
