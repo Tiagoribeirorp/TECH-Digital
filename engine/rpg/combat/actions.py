@@ -95,6 +95,18 @@ def dedicated_move_distance() -> float:
     return 3.0
 
 
+def action_speed_cost(action: CombatAction, *, weapon_speed: float | None = None) -> float:
+    """Return the confirmed speed cost, including Parry weapon speed."""
+    rule = ACTION_RULES[action]
+    if action is CombatAction.PARRY:
+        if weapon_speed is None:
+            raise ValueError("Parry requires the weapon speed")
+        if weapon_speed < 0:
+            raise ValueError("Weapon speed cannot be negative")
+        return weapon_speed
+    return rule.speed_cost
+
+
 def can_pay_speed(current_speed: float, cost: float) -> bool:
     if cost < 0:
         raise ValueError("Speed cost cannot be negative")
