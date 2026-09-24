@@ -7,6 +7,7 @@ establish a universal formula deriving them from every weapon, armor and skill.
 from dataclasses import dataclass
 
 from engine.rpg.combat.actions import CombatAction, action_modifiers
+from engine.rpg.combat.rules import CombatRules, DEFAULT_COMBAT_RULES
 from engine.rpg.combat.damage import apply_damage
 from engine.rpg.combat.opposed_attack import (
     OpposedAttackResolution,
@@ -38,6 +39,7 @@ def resolve_opposed_attack_action(
     defense_value: int,
     damage: int,
     action: CombatAction = CombatAction.ATTACK,
+    rules: CombatRules = DEFAULT_COMBAT_RULES,
 ) -> OpposedAttackCombatResult:
     if combat.phase != CombatPhase.EXECUTION:
         raise ValueError("Attacks can only resolve during execution phase")
