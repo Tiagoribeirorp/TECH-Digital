@@ -8,6 +8,9 @@ extends Control
 @onready var fadiga_label: Label = $FadigaLabel
 
 
+var character_state: Dictionary = {}
+
+
 func _ready() -> void:
 	load_character_from_engine()
 
@@ -18,6 +21,7 @@ func load_character_from_engine() -> void:
 	)
 
 	var output: Array = []
+
 	var exit_code := OS.execute(
 		"python",
 		[bridge_path],
@@ -35,34 +39,80 @@ func load_character_from_engine() -> void:
 		title_label.text = "Engine não retornou dados"
 		return
 
-	var json_text: String = str(output[0]).strip_edges()
-	var json := JSON.new()
-
-	if json.parse(json_text) != OK:
+	if not apply_engine_response(output[0]):
 		title_label.text = "Erro ao interpretar dados do Engine"
-		print("JSON recebido: ", json_text)
+
+
+func execute_basic_action() -> void:
+	var bridge_path := ProjectSettings.globalize_path(
+		"res://../../engine/rpg/bridge.py"
+	)
+
+	var fatigue := int(character_state.get("fatigue", 0))
+	var hp := int(character_state.get("hp", 0))
+
+	var output: Array = []
+
+	var exit_code := OS.execute(
+		"python",
+		[
+			bridge_path,
+			"--action",
+			"basic",
+			"--hp",
+			str(hp),
+			"--fatigue",
+			str(fatigue),
+		],
+		output,
+		true
+	)
+
+	if exit_code != 0:
+		title_label.text = "Erro ao executar ação"
+		print("Erro ao executar ação. Código: ", exit_code)
+		print("Saída: ", output)
 		return
 
-	var character: Dictionary = json.data
+	if output.is_empty():
+		title_label.text = "Engine não retornou dados"
+		return
 
-	vida_bar.max_value = character["hp_max"]
-	vida_bar.value = character["hp"]
+	if apply_engine_response(output[0]):
+		title_label.text = "Ação realizada!"
 
-	fadiga_bar.max_value = character["fatigue_max"]
-	fadiga_bar.value = character["fatigue"]
+
+func apply_engine_response(raw_response: Variant) -> bool:
+	var json := JSON.new()
+
+	if json.parse(str(raw_response).strip_edges()) != OK:
+		print("JSON inválido recebido do Engine: ", raw_response)
+		return false
+
+	if not (json.data is Dictionary):
+		print("Engine retornou dados em formato inesperado.")
+		return false
+
+	character_state = json.data
+
+	vida_bar.max_value = int(character_state["hp_max"])
+	vida_bar.value = int(character_state["hp"])
+
+	fadiga_bar.max_value = int(character_state["fatigue_max"])
+	fadiga_bar.value = int(character_state["fatigue"])
 
 	vida_label.text = "Vida: %d/%d" % [
-		character["hp"],
-		character["hp_max"]
+		character_state["hp"],
+		character_state["hp_max"],
 	]
 
 	fadiga_label.text = "Fadiga: %d/%d" % [
-		character["fatigue"],
-		character["fatigue_max"]
+		character_state["fatigue"],
+		character_state["fatigue_max"],
 	]
 
-	title_label.text = character["name"]
+	return true
 
 
 func _on_button_pressed() -> void:
-	title_label.text = "Ação realizada!"
+	execute_basic_action()
