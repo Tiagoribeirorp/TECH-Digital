@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3 uid="uid://piuwhwt74h2f"]
+
+[ext_resource type="Script" uid="uid://ctiquwxygu38l" path="res://main.gd" id="1_ig7tw"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ig7tw")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 516.0
+offset_top = 289.0
+offset_right = 628.0
+offset_bottom = 312.0
+text = "T.E.C.H. Digital"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 522.0
+offset_top = 333.0
+offset_right = 616.0
+offset_bottom = 364.0
+text = "Iniciar Jogo"
+
+[node name="VidaBar" type="ProgressBar" parent="."]
+layout_mode = 0
+offset_left = 426.0
+offset_top = 392.0
+offset_right = 726.0
+offset_bottom = 419.0
+
+[node name="FadigaBar" type="ProgressBar" parent="."]
+layout_mode = 0
+offset_left = 427.0
+offset_top = 431.0
+offset_right = 727.0
+offset_bottom = 458.0
+
+[node name="VidaLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 379.0
+offset_top = 395.0
+offset_right = 419.0
+offset_bottom = 418.0
+text = "Vida"
+
+[node name="FadigaLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 371.0
+offset_top = 432.0
+offset_right = 422.0
+offset_bottom = 481.0
+text = "Fadiga
+"
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
