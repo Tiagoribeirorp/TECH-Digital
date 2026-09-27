@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://piuwhwt74h2f"]
+[gd_scene load_steps=5 format=3 uid="uid://piuwhwt74h2f"]
 
 [ext_resource type="Script" uid="uid://ctiquwxygu38l" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="Texture2D" uid="uid://slf8sput8yn4" path="res://assets/title-screen-mockup.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/battle-background.png" id="4_battle_bg"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -15,51 +17,226 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ig7tw")
 
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BattleBackground" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_battle_bg")
+expand_mode = 1
+stretch_mode = 6
+
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
-offset_left = 516.0
-offset_top = 289.0
-offset_right = 628.0
-offset_bottom = 312.0
+offset_left = 390.0
+offset_top = 38.0
+offset_right = 760.0
+offset_bottom = 72.0
+horizontal_alignment = 1
 text = "T.E.C.H. Digital"
 
 [node name="Button" type="Button" parent="."]
 layout_mode = 0
-offset_left = 522.0
-offset_top = 333.0
-offset_right = 616.0
-offset_bottom = 364.0
-text = "Iniciar Jogo"
+offset_left = 360.0
+offset_top = 580.0
+offset_right = 470.0
+offset_bottom = 622.0
+text = "Atacar"
+
+[node name="DefenseButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 480.0
+offset_top = 580.0
+offset_right = 590.0
+offset_bottom = 622.0
+text = "Defender"
+
+[node name="SpecialButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 580.0
+offset_right = 735.0
+offset_bottom = 622.0
+text = "Golpe forte"
+
+[node name="RecoverButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 745.0
+offset_top = 580.0
+offset_right = 865.0
+offset_bottom = 622.0
+text = "Recuperar"
+
+[node name="SaveButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 185.0
+offset_right = 120.0
+offset_bottom = 220.0
+text = "Salvar"
+
+[node name="LoadButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 130.0
+offset_top = 185.0
+offset_right = 226.0
+offset_bottom = 220.0
+text = "Carregar"
 
 [node name="VidaBar" type="ProgressBar" parent="."]
 layout_mode = 0
-offset_left = 426.0
-offset_top = 392.0
-offset_right = 726.0
-offset_bottom = 419.0
+offset_left = 180.0
+offset_top = 500.0
+offset_right = 480.0
+offset_bottom = 533.0
 
 [node name="FadigaBar" type="ProgressBar" parent="."]
 layout_mode = 0
-offset_left = 427.0
-offset_top = 431.0
-offset_right = 727.0
-offset_bottom = 458.0
+offset_left = 180.0
+offset_top = 540.0
+offset_right = 480.0
+offset_bottom = 573.0
 
 [node name="VidaLabel" type="Label" parent="."]
 layout_mode = 0
-offset_left = 379.0
-offset_top = 395.0
-offset_right = 419.0
-offset_bottom = 418.0
+offset_left = 80.0
+offset_top = 503.0
+offset_right = 170.0
+offset_bottom = 530.0
+horizontal_alignment = 2
 text = "Vida"
 
 [node name="FadigaLabel" type="Label" parent="."]
 layout_mode = 0
-offset_left = 371.0
-offset_top = 432.0
-offset_right = 422.0
-offset_bottom = 481.0
+offset_left = 80.0
+offset_top = 543.0
+offset_right = 170.0
+offset_bottom = 570.0
+horizontal_alignment = 2
 text = "Fadiga
 "
 
+[node name="EnemyVidaBar" type="ProgressBar" parent="."]
+layout_mode = 0
+offset_left = 850.0
+offset_top = 105.0
+offset_right = 1120.0
+offset_bottom = 138.0
+
+[node name="EnemyNameLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 780.0
+offset_top = 72.0
+offset_right = 1120.0
+offset_bottom = 102.0
+horizontal_alignment = 1
+text = "Alvo de treino"
+
+[node name="EnemyVidaLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 760.0
+offset_top = 108.0
+offset_right = 840.0
+offset_bottom = 135.0
+horizontal_alignment = 2
+text = "Alvo: 10/10"
+
+[node name="DieLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 190.0
+offset_right = 652.0
+offset_bottom = 255.0
+theme_override_colors/font_color = Color(0.96, 0.88, 0.62, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = "D20\n-"
+
+[node name="InitiativeLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 390.0
+offset_top = 255.0
+offset_right = 762.0
+offset_bottom = 285.0
+theme_override_colors/font_color = Color(0.96, 0.88, 0.62, 1)
+horizontal_alignment = 1
+text = "Iniciativa: -"
+
+[node name="RollLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 430.0
+offset_top = 295.0
+offset_right = 760.0
+offset_bottom = 345.0
+horizontal_alignment = 1
+text = "D20: -  |  alvo: -"
+
+[node name="CombatLogLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 350.0
+offset_top = 365.0
+offset_right = 800.0
+offset_bottom = 430.0
+horizontal_alignment = 1
+text = "Escolha uma acao."
+
+[node name="RoundLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 445.0
+offset_right = 660.0
+offset_bottom = 475.0
+horizontal_alignment = 1
+text = "Rodada 1"
+
+[node name="StartMenu" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StartGameButton" type="Button" parent="StartMenu"]
+layout_mode = 0
+offset_left = 535.0
+offset_top = 585.0
+offset_right = 665.0
+offset_bottom = 625.0
+text = "Iniciar Jogo"
+
+[node name="EnemySelectButton" type="Button" parent="StartMenu"]
+layout_mode = 0
+offset_left = 485.0
+offset_top = 535.0
+offset_right = 715.0
+offset_bottom = 570.0
+text = "Inimigo: Alvo de treino"
+
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="DefenseButton" to="." method="_on_defense_button_pressed"]
+[connection signal="pressed" from="SpecialButton" to="." method="_on_special_button_pressed"]
+[connection signal="pressed" from="RecoverButton" to="." method="_on_recover_button_pressed"]
+[connection signal="pressed" from="SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="LoadButton" to="." method="_on_load_button_pressed"]
+[connection signal="pressed" from="StartMenu/StartGameButton" to="." method="_on_start_game_pressed"]
+[connection signal="pressed" from="StartMenu/EnemySelectButton" to="." method="_on_enemy_select_pressed"]

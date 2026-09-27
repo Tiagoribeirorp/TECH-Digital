@@ -26,7 +26,6 @@ class CombatRules:
     dodge_speed_cost: float = 3
     block_speed_cost: float = 3
     movement_per_speed: float = 1.5
-    dedicated_move_distance: float = 3.0
 
 
 DEFAULT_COMBAT_RULES = CombatRules()

@@ -10,7 +10,6 @@ from enum import Enum
 
 class CombatAction(str, Enum):
     ATTACK = "attack"
-    MOVE = "move"
     SURGICAL_ATTACK = "surgical_attack"
     FIGHT_DEFENSIVELY = "fight_defensively"
     CHANGE_ACTION = "change_action"
@@ -39,11 +38,6 @@ ACTION_RULES: dict[CombatAction, ActionRule] = {
     CombatAction.ATTACK: ActionRule(
         CombatAction.ATTACK,
         description="Ataque básico; resolução depende dos valores de combate validados.",
-    ),
-    CombatAction.MOVE: ActionRule(
-        CombatAction.MOVE,
-        speed_cost=0.0,
-        description="Ação dedicada a movimento; a distância confirmada é 3m.",
     ),
     CombatAction.SURGICAL_ATTACK: ActionRule(
         CombatAction.SURGICAL_ATTACK,
@@ -87,16 +81,6 @@ def action_modifiers(action: CombatAction) -> dict[str, int]:
         "defense": rule.defense_modifier,
         "damage": rule.damage_modifier,
     }
-
-
-def movement_distance_for_speed(speed_per_turn: float) -> float:
-    """Convert Vel/Tur into metres using the confirmed 1.5m ratio."""
-    return speed_per_turn * 1.5
-
-
-def dedicated_move_distance() -> float:
-    """Distance for an action dedicated only to movement."""
-    return 3.0
 
 
 def action_speed_cost(action: CombatAction, *, weapon_speed: float | None = None) -> float:

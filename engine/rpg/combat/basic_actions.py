@@ -11,8 +11,6 @@ from engine.rpg.combat.defensive_state import DefenseChoice, DefenseChoiceState
 from engine.rpg.combat.actions import (
     CombatAction,
     action_speed_cost,
-    dedicated_move_distance,
-    movement_distance_for_speed,
 )
 from engine.rpg.combat.state import CombatPhase, CombatState
 from engine.rpg.core.resolution import ResolutionRecord
@@ -28,58 +26,6 @@ class ActionExecutionResult:
     defense_mode: str | None
     resolution_id: str
     resolution_sequence: int
-
-
-def execute_move(
-    combat: CombatState,
-    character_id: str,
-    *,
-    dedicated: bool = True,
-) -> ActionExecutionResult:
-    if combat.phase != CombatPhase.EXECUTION:
-        raise ValueError("Actions can only resolve during execution phase")
-    combatant = combat.get_combatant(character_id)
-    if not combatant.is_active:
-        raise ValueError("Inactive combatant cannot move")
-
-    if dedicated:
-        distance = dedicated_move_distance()
-        speed_spent = 0.0
-    else:
-        speed_spent = combatant.available_speed
-        distance = movement_distance_for_speed(speed_spent)
-
-    combatant.available_speed -= speed_spent
-    record = append_resolution(
-        combat.resolution_log,
-        ResolutionRecord(
-            source="combat",
-            action=CombatAction.MOVE.value,
-            actor_id=character_id,
-            result="moved",
-            consequences={
-                "distance_m": distance,
-                "speed_spent": speed_spent,
-            },
-        ),
-    )
-    combat.combat_log.append({
-        "event": "movement_resolved",
-        "round": combat.round_number,
-        "character_id": character_id,
-        "distance_m": distance,
-        "speed_spent": speed_spent,
-    })
-    return ActionExecutionResult(
-        action=CombatAction.MOVE,
-        character_id=character_id,
-        speed_spent=speed_spent,
-        distance_moved=distance,
-        defense_mode=None,
-        resolution_id=record.id,
-        resolution_sequence=record.sequence,
-    )
-
 
 
 def select_defense_choice(
